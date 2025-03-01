@@ -1,7 +1,7 @@
 // Controller 負責處理來自 routes 的請求，並與 Model、Service 互動
 
-const {findUserByAccount} = require("../models/userModel");
-const {verifyPassword, generateToken} = require("../services/authService");
+const {findUserByAccount, findUserById} = require("../models/userModel");
+const {verifyPassword, generateToken, decodeToken} = require("../services/authService");
 
 // login 需要等待並且有 req, res
 const login = async (req, res) => {
@@ -26,7 +26,7 @@ const login = async (req, res) => {
 
         const token = generateToken(user.id);
 
-        res.json({token});
+        res.json({token, user});
 
     } catch (error) {
         console.error("伺服器錯誤！", error);
@@ -35,4 +35,21 @@ const login = async (req, res) => {
 
 };
 
-module.exports = {login};
+const verifyJWT = async(req, res) => {
+
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "未提供 token！" });
+
+    try {
+        const decoded = decodeToken(token);
+        const user = await findUserById(decoded.userId);
+        if (!user) return res.status(404).json({ message: "用戶不存在！" });
+        res.json({ user });
+        console.log(user)
+    } catch (error) {
+        console.error("Token 無效或已過期！", error);
+        res.status(401).json({ message: "Token 無效或已過期！" });
+    }
+};
+
+module.exports = {login, verifyJWT};

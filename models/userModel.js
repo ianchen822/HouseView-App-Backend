@@ -28,5 +28,17 @@ const findUserByAccount = async (account) => {
     // }
 };
 
+const findUserById = async (userId) => {
+    try {
+        const query_str = "SELECT id, name, account FROM users WHERE id = $1";
+        const result = await pool.query(query_str, [userId]);
+        // console.log(result)
+        return result.rows[0];
+    } catch (error) {
+        console.error("資料庫查詢錯誤:", error);
+        throw error;
+    }
+};
+
 // 用 {} 比較好用解構的方式並且可放入多個東西進去
-module.exports = {findUserByAccount};
+module.exports = {findUserByAccount, findUserById};

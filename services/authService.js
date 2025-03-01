@@ -19,4 +19,9 @@ const generateToken = (userId) => {
     return jwt.sign({userId}, process.env.JWT_SECRET, {expiresIn: "1h"});
 };
 
-module.exports = {verifyPassword, generateToken};
+const decodeToken = (token) => {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return decoded;
+}
+
+module.exports = {verifyPassword, generateToken, decodeToken};
